@@ -1,52 +1,81 @@
-import inquirer from "inquirer";
+import inquirer from 'inquirer';
 
-async function Cal() {
-    let val = await inquirer.prompt([{
-        type: "number",
-        name: "num1",
-        message: "Enter Number1:"
-    },
+async function getNumberInput(promptMessage: string): Promise<number> {
+  const response = await inquirer.prompt([
     {
-        type: "list",
-        name: "operation",
-        message: "Choose Operation:",
-        choices: ["+","-","*","/","%","**"]
+      type: 'input',
+      name: 'number',
+      message: promptMessage,
+      validate: (value) => {
+        const parsedValue = parseFloat(value);
+        if (isNaN(parsedValue)) {
+          return 'Please enter a valid number.';
+        }
+        return true;
+      },
     },
+  ]);
+  return parseFloat(response.number);
+}
+
+async function main() {
+  console.log('Welcome to the Calculator App!\n');
+
+  const operationChoices = [
+    'Addition',
+    'Subtraction',
+    'Multiplication',
+    'Modulus',
+    'Division',
+    'Exponentiation',
+  ];
+
+  const operationChoice = await inquirer.prompt([
     {
-        type: "number",
-        name: "num2",
-        message: "Enter Number2:"
-    }
-]);
+      type: 'list',
+      name: 'operation',
+      message: 'Select an operation:',
+      choices: operationChoices,
+    },
+  ]);
 
-    switch (val.operation) {
-        case "+":
-            console.log(`${val.num1} + ${val.num2} = ${val.num1 + val.num2}`);
-            break;
-    
-        case "-":
-            console.log(`${val.num1} - ${val.num2} = ${val.num1 - val.num2}`);
-            break;
-    
-        case "*":
-            console.log(`${val.num1} * ${val.num2} = ${val.num1 * val.num2}`);
-            break;
-    
-        case "/":
-            console.log(`${val.num1} / ${val.num2} = ${val.num1 / val.num2}`);
-            break;
-        
-        case "%":
-            console.log(`${val.num1} % ${val.num2} = ${val.num1 % val.num2}`);
-            break;
-    
-        case "**":
-            console.log(`${val.num1} raise to the power ${val.num2} = ${val.num1 ** val.num2}`);
-            break;
-        
-        default:
-            break;
-    }
-};
+  const num1 = await getNumberInput('Enter the first number:');
+  const num2 = await getNumberInput('Enter the second number:');
 
-Cal();
+  let result: number;
+
+  switch (operationChoice.operation) {
+    case 'Addition':
+      result = num1 + num2;
+      break;
+    case 'Subtraction':
+      result = num1 - num2;
+      break;
+    case 'Multiplication':
+      result = num1 * num2;
+      break;
+    case 'Modulus':
+      result = num1 % num2;
+      break;
+    case 'Division':
+      if (num2 === 0) {
+        console.log('Error: Division by zero is not allowed.');
+        return;
+      }
+      result = num1 / num2;
+      break;
+    case 'Exponentiation':
+      result = Math.pow(num1, num2);
+      break;
+    default:
+      console.log('Invalid operation.');
+      return;
+  }
+
+  console.log(`Result of ${operationChoice.operation}: ${result}`);
+}
+
+main().catch((error) => {
+  console.error('An error occurred:', error);
+});
+
